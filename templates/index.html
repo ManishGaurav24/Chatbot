@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Groot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/groot.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/groot.png') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <button id="sidebarToggle" class="sidebar-toggle">
+            <span class="material-icons">menu</span>
+        </button>
+        <div class="nav-title">
+            <img src="{{ url_for('static', filename='images/groot.png') }}" alt="Groot" class="nav-icon">
+            Groot
+        </div>
+        <div class="nav-controls">
+            <div class="toggle-container">
+                <label class="switch">
+                    <input type="checkbox" id="modelToggle">
+                    <span class="slider round"></span>
+                </label>
+                <span id="modelLabel">Gemini</span>
+            </div>
+            <button id="themeToggle" class="theme-toggle-btn">
+                <span class="material-icons">dark_mode</span>
+            </button>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button id="newChat" class="new-chat-btn">New Chat</button>
+            </div>
+            <div id="chatHistory"></div>
+        </div>
+        <div class="chat-container">
+            <div id="chatMessages" class="chat-messages"></div>
+            <div class="input-container">
+                <label for="fileUpload" class="file-upload-btn">
+                    <span class="material-icons">attach_file</span>
+                </label>
+                <input type="file" id="fileUpload" accept=".pdf,.png,.jpg,.jpeg" style="display: none;">
+                <button id="voiceInputBtn" class="voice-btn">
+                    <span class="material-icons">mic</span>
+                </button>
+                <input type="text" id="userInput" placeholder="Type your message...">
+                <button id="sendButton">Send</button>
+                <button id="speakResponseBtn" class="voice-btn" title="Toggle speech output">
+                    <span class="material-icons">volume_up</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
