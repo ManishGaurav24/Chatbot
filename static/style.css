@@ -136,6 +136,7 @@ body {
     border-radius: 8px;
     max-width: 70%;
     word-wrap: break-word;
+    line-height: 1.5;
 }
 
 .message.user-message {
@@ -148,6 +149,19 @@ body {
     background: var(--message-bot);
     align-self: flex-start;
     margin-right: auto;
+}
+
+.message.bot-message ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.message.bot-message li {
+    margin: 5px 0;
+}
+
+.message.bot-message strong {
+    color: var(--accent-color);
 }
 
 .input-container {

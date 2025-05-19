@@ -36,9 +36,7 @@ function loadChatHistory() {
             // If no current chat is selected but we have chats, select the most recent one
             if (!currentChatId && Object.keys(chatHistories).length > 0) {
                 const mostRecentChatId = Object.keys(chatHistories).sort().reverse()[0];
-                loadChat(mostRecentChatId);
-            } else if (currentChatId) {
-                loadChat(currentChatId);
+                switchToChat(mostRecentChatId);
             }
         });
 }
@@ -57,20 +55,72 @@ function updateChatHistoryUI() {
         const firstMessage = chatHistories[chatId][0]?.text || 'New Chat';
         const truncatedMessage = firstMessage.substring(0, 30) + (firstMessage.length > 30 ? '...' : '');
         historyItem.textContent = truncatedMessage;
-        historyItem.onclick = () => loadChat(chatId);
+        historyItem.onclick = () => switchToChat(chatId);
         chatHistoryDiv.appendChild(historyItem);
     });
 }
 
-function loadChat(chatId) {
+function switchToChat(chatId) {
+    if (currentChatId === chatId) {
+        return; // Don't switch to the same chat
+    }
     currentChatId = chatId;
     localStorage.setItem('currentChatId', chatId);
+    loadChat(chatId);
+}
+
+function formatResponse(text) {
+    // Replace markdown-style bold with HTML
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Replace markdown-style bullets with proper HTML list
+    if (text.includes('* ')) {
+        const lines = text.split('\n');
+        let inList = false;
+        text = lines.map(line => {
+            if (line.trim().startsWith('* ')) {
+                const content = line.trim().substring(2);
+                if (!inList) {
+                    inList = true;
+                    return `<ul><li>${content}</li>`;
+                }
+                return `<li>${content}</li>`;
+            } else if (inList && line.trim() !== '') {
+                inList = false;
+                return `</ul>${line}`;
+            } else if (inList && line.trim() === '') {
+                inList = false;
+                return '</ul>';
+            }
+            return line;
+        }).join('\\n');
+        
+        if (inList) {
+            text += '</ul>';
+        }
+    }
+    
+    // Convert newlines to <br> tags
+    text = text.replace(/\\n/g, '<br>');
+    
+    return text;
+}
+
+function loadChat(chatId) {
     document.getElementById('chatMessages').innerHTML = '';
     
     if (chatHistories[chatId]) {
         chatHistories[chatId].forEach(msg => {
-            addMessage(msg.text, msg.isUser);
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${msg.isUser ? 'user-message' : 'bot-message'}`;
+            if (msg.isUser) {
+                messageDiv.textContent = msg.text;
+            } else {
+                messageDiv.innerHTML = formatResponse(msg.text);
+            }
+            document.getElementById('chatMessages').appendChild(messageDiv);
         });
+        document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
     }
     updateChatHistoryUI();
 }
@@ -93,7 +143,13 @@ function addMessage(message, isUser = false) {
     const chatMessages = document.getElementById('chatMessages');
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
-    messageDiv.textContent = message;
+    
+    if (isUser) {
+        messageDiv.textContent = message;
+    } else {
+        messageDiv.innerHTML = formatResponse(message);
+    }
+    
     chatMessages.appendChild(messageDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
@@ -103,9 +159,10 @@ function addMessage(message, isUser = false) {
         localStorage.setItem('chatHistories', JSON.stringify(chatHistories));
     }
 
-    // Add speech output for bot messages
     if (!isUser && isSpeechEnabled) {
-        speakText(message);
+        // Remove HTML tags for speech
+        const plainText = message.replace(/<[^>]*>/g, '');
+        speakText(plainText);
     }
 }
 
